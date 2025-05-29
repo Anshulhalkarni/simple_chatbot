@@ -3,74 +3,491 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Career Companion</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Your Personal Career Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom Colors for Tailwind */
+        :root {
+            --primary-color: #0B6E4F; /* Green for guidance */
+            --accent-color: #F4A261; /* Orange accent */
+            --secondary-accent-color: #0077B6; /* Blue accent */
+            --bg-light: #f8f9fa; /* Very light grey */
+            --text-dark: #333;
+            --text-light: #fefefe;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Utility classes for custom colors */
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .border-primary { border-color: var(--primary-color); }
+        .hover-bg-primary:hover { background-color: var(--primary-color); }
+
+        .bg-accent { background-color: var(--accent-color); }
+        .text-accent { color: var(--accent-color); }
+        .border-accent { border-color: var(--accent-color); }
+        .hover-bg-accent:hover { background-color: var(--accent-color); }
+
+        /* General button styling */
+        .btn {
+            @apply px-6 py-3 rounded-full font-semibold transition-all duration-300 ease-in-out;
+        }
+        .btn-primary {
+            @apply bg-primary text-white hover:bg-opacity-90 shadow-lg;
+        }
+        .btn-outline {
+            @apply border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white;
+        }
+
+        /* Typing animation */
+        .typing-indicator span {
+            display: inline-block;
+            animation: bounce 0.8s infinite ease-in-out alternate;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        /* Custom scrollbar for chat log */
+        #chat-log::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-log::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        #chat-log::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        #chat-log::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Hide sections by default */
+        .hidden-section {
+            display: none;
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeInScale 0.3s ease-out forwards;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
-<body>
-    <div class="chatbot-container">
-        <header class="chatbot-header">
-            <div class="header-content">
-                <i class="fas fa-graduation-cap chatbot-icon"></i>
-                <h1>Career Guidance Chatbot</h1>
+<body class="flex flex-col min-h-screen">
+
+    <div class="flex flex-col flex-grow">
+
+        <section id="home-section" class="flex flex-col items-center justify-center text-center py-16 px-4 bg-gradient-to-br from-primary to-green-600 text-white flex-grow">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in-up">Your Personal Career Guide</h1>
+            <p class="text-lg md:text-xl mb-8 opacity-0 animate-fade-in-up animation-delay-500">Free, reliable, and multilingual career advice at your fingertips.</p>
+            <button id="start-chat-btn" class="btn btn-primary bg-accent hover:bg-orange-500 text-lg opacity-0 animate-fade-in-up animation-delay-1000">Start Chat Now <i class="fas fa-arrow-right ml-2"></i></button>
+        </section>
+
+        <section id="about-section" class="py-16 px-4 bg-white text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary mb-8">About Us</h2>
+            <p class="max-w-3xl mx-auto text-lg leading-relaxed text-gray-700">
+                We are dedicated to empowering students from Tier-2 and Tier-3 cities across India with accessible and personalized career guidance. Our AI-powered chatbot leverages the Gemini API to provide tailored advice, helping you navigate complex career choices, discover new opportunities, and build a successful future.
+            </p>
+        </section>
+
+        <section id="features-section" class="py-16 px-4 bg-gray-100">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary text-center mb-12">What We Offer</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-accent text-5xl mb-4"><i class="fas fa-user-graduate"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Personalized Career Guidance</h3>
+                    <p class="text-gray-600">Get advice tailored to your interests, skills, and local context.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-accent text-5xl mb-4"><i class="fas fa-language"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Local Language Support</h3>
+                    <p class="text-gray-600">Interact in your preferred language for better understanding.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-accent text-5xl mb-4"><i class="fas fa-book-open"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Course & College Suggestions</h3>
+                    <p class="text-gray-600">Find the best educational paths and institutions for you.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-accent text-5xl mb-4"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Exam & Skill Pathways</h3>
+                    <p class="text-gray-600">Guidance on competitive exams and essential skill development.</p>
+                </div>
             </div>
-        </header>
-        <main class="chatbot-main">
-            <div id="chat-log" class="chat-log">
-                <div class="bot-message"><i class="fas fa-robot"></i> Hi there! How can I guide your career journey today?</div>
+        </section>
+
+        <section id="chatbot-section" class="hidden-section flex flex-col flex-grow bg-white rounded-lg shadow-xl max-w-3xl mx-auto my-8 w-full">
+            <header class="bg-primary text-white p-6 rounded-t-lg flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-robot text-3xl"></i>
+                    <h2 class="text-2xl font-semibold">Career Counselor</h2>
+                </div>
+                <div class="relative">
+                    <button id="language-toggle" class="bg-white text-primary px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-globe mr-2"></i> <span id="current-lang">English</span>
+                    </button>
+                    <div id="language-dropdown" class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-1 hidden">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-lang="en">English</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-lang="hi">Hindi</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-grow p-6 overflow-y-auto" id="chat-log" style="max-height: 70vh;">
+                <div class="bot-message flex items-start gap-3 mb-4">
+                    <div class="flex-shrink-0 text-primary text-xl"><i class="fas fa-robot"></i></div>
+                    <div class="bg-blue-50 text-gray-800 p-4 rounded-xl rounded-bl-none shadow-sm max-w-[80%]">
+                        Hello! I'm your AI Career Counselor. How can I assist you today?
+                    </div>
+                </div>
+            </main>
+
+            <div class="p-6 border-t border-gray-200 bg-gray-50">
+                <div id="suggestion-chips" class="flex flex-wrap gap-2 mb-4">
+                    <button class="chip-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors">What courses after 10th?</button>
+                    <button class="chip-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors">Best scholarships for girls</button>
+                    <button class="chip-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors">Career in IT after 12th science</button>
+                    <button class="chip-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors">How to prepare for NEET?</button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input type="text" id="user-input" placeholder="Type your message..." class="flex-grow p-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-700">
+                    <button id="send-button" class="btn btn-primary flex items-center justify-center w-14 h-14 p-0 rounded-full">
+                        <i class="fas fa-paper-plane text-xl"></i>
+                    </button>
+                </div>
             </div>
-            <div class="input-area">
-                <input type="text" id="user-input" placeholder="Ask me about careers, courses, etc.">
-                <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
+        </section>
+
+        <div id="profile-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold text-primary mb-6 text-center">Tell Us About Yourself</h3>
+                <form id="profile-form" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Name:</label>
+                        <input type="text" id="name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required>
+                    </div>
+                    <div>
+                        <label for="age" class="block text-gray-700 text-sm font-semibold mb-2">Age:</label>
+                        <input type="number" id="age" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" min="10" max="30" required>
+                    </div>
+                    <div>
+                        <label for="grade" class="block text-gray-700 text-sm font-semibold mb-2">Grade/Class:</label>
+                        <select id="grade" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required>
+                            <option value="">Select your class</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                            <option value="undergraduate">Undergraduate</option>
+                            <option value="graduate">Graduate</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="interests" class="block text-gray-700 text-sm font-semibold mb-2">Interests:</label>
+                        <select id="interests" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required>
+                            <option value="">Select your main interest</option>
+                            <option value="science">Science</option>
+                            <option value="commerce">Commerce</option>
+                            <option value="arts">Arts</option>
+                            <option value="vocational">Vocational/Skills</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="preferred-language" class="block text-gray-700 text-sm font-semibold mb-2">Preferred Language:</label>
+                        <select id="preferred-language" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent" required>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            </select>
+                    </div>
+                    <button type="submit" class="w-full btn btn-primary bg-primary hover:bg-green-700 mt-6">Save Profile</button>
+                </form>
             </div>
-        </main>
-        <footer class="chatbot-footer">
-            <p>&copy; 2025 Your Career Companion</p>
-        </footer>
+        </div>
+
     </div>
+
+    <footer class="bg-gray-800 text-white py-8 px-4 text-center mt-auto">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <p class="mb-4 md:mb-0">&copy; 2025 Your Career Companion. All rights reserved.</p>
+            <div class="flex space-x-6 mb-4 md:mb-0">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fas fa-envelope mr-2"></i>Contact</a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fas fa-comment-dots mr-2"></i>Feedback</a>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const homeSection = document.getElementById('home-section');
+            const chatbotSection = document.getElementById('chatbot-section');
+            const profileModal = document.getElementById('profile-modal');
+            const startChatBtn = document.getElementById('start-chat-btn');
+            const profileForm = document.getElementById('profile-form');
+            const chatLog = document.getElementById('chat-log');
             const userInput = document.getElementById('user-input');
             const sendButton = document.getElementById('send-button');
-            const chatLog = document.getElementById('chat-log');
+            const suggestionChips = document.getElementById('suggestion-chips');
+            const languageToggle = document.getElementById('language-toggle');
+            const languageDropdown = document.getElementById('language-dropdown');
+            const currentLangSpan = document.getElementById('current-lang');
 
-            function appendMessage(message, sender) {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add(`${sender}-message`);
-                messageDiv.innerHTML = (sender === 'user' ? '<i class="fas fa-user"></i> ' : '<i class="fas fa-robot"></i> ') + message;
-                chatLog.appendChild(messageDiv);
-                chatLog.scrollTop = chatLog.scrollHeight;
+            // --- State Variables ---
+            let profileData = {};
+            let chatHistory = []; // Stores { message: "...", sender: "user/bot" }
+
+            // --- Utility Functions ---
+
+            // Function to show a specific section and hide others
+            function showSection(sectionId) {
+                const sections = [homeSection, chatbotSection];
+                sections.forEach(section => {
+                    if (section) { // Check if section exists
+                        section.classList.add('hidden-section');
+                    }
+                });
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden-section');
+                }
             }
 
-            sendButton.addEventListener('click', () => {
+            // Append message to chat log with typing animation
+            function appendMessage(message, sender, animateTyping = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add(`${sender}-message`, 'flex', 'items-start', 'gap-3', 'mb-4');
+
+                const iconDiv = document.createElement('div');
+                iconDiv.classList.add('flex-shrink-0', 'text-xl', sender === 'user' ? 'text-secondary-accent-color' : 'text-primary');
+                iconDiv.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+                messageDiv.appendChild(iconDiv);
+
+                const textBubble = document.createElement('div');
+                textBubble.classList.add('p-4', 'rounded-xl', 'shadow-sm', 'max-w-[80%]', 'word-break-break-word');
+                if (sender === 'user') {
+                    textBubble.classList.add('bg-secondary-accent-color', 'text-white', 'rounded-br-none');
+                } else {
+                    textBubble.classList.add('bg-blue-50', 'text-gray-800', 'rounded-bl-none');
+                }
+                messageDiv.appendChild(textBubble);
+
+                chatLog.appendChild(messageDiv);
+
+                if (animateTyping && sender === 'bot') {
+                    textBubble.innerHTML = '<span class="typing-indicator"><span>.</span><span>.</span><span>.</span></span>';
+                    // Simulate typing delay
+                    let i = 0;
+                    const interval = setInterval(() => {
+                        if (i < message.length) {
+                            textBubble.textContent = message.substring(0, i + 1);
+                            i++;
+                            chatLog.scrollTop = chatLog.scrollHeight; // Keep scrolling during typing
+                        } else {
+                            clearInterval(interval);
+                            textBubble.textContent = message; // Ensure full message is displayed
+                            chatLog.scrollTop = chatLog.scrollHeight; // Final scroll
+                        }
+                    }, 20); // Adjust typing speed here
+                } else {
+                    textBubble.textContent = message;
+                    chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to bottom
+                }
+
+                // Store in history
+                chatHistory.push({ message: message, sender: sender });
+                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            }
+
+            // Load profile data from localStorage
+            function loadProfile() {
+                const savedProfile = localStorage.getItem('studentProfile');
+                if (savedProfile) {
+                    profileData = JSON.parse(savedProfile);
+                    console.log("Profile loaded:", profileData);
+                    return true;
+                }
+                return false;
+            }
+
+            // Load chat history from localStorage
+            function loadChatHistory() {
+                const savedChatHistory = localStorage.getItem('chatHistory');
+                if (savedChatHistory) {
+                    chatHistory = JSON.parse(savedChatHistory);
+                    chatHistory.forEach(msg => {
+                        // Re-append without typing animation on load
+                        appendMessage(msg.message, msg.sender, false);
+                    });
+                }
+            }
+
+            // --- Event Handlers ---
+
+            // Start Chat button click
+            startChatBtn.addEventListener('click', () => {
+                if (!loadProfile()) {
+                    profileModal.classList.remove('hidden');
+                } else {
+                    showSection('chatbot-section');
+                    loadChatHistory(); // Load history if profile exists
+                }
+            });
+
+            // Profile form submission
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                profileData = {
+                    name: document.getElementById('name').value,
+                    age: document.getElementById('age').value,
+                    grade: document.getElementById('grade').value,
+                    interests: document.getElementById('interests').value,
+                    preferredLanguage: document.getElementById('preferred-language').value
+                };
+                localStorage.setItem('studentProfile', JSON.stringify(profileData));
+                profileModal.classList.add('hidden');
+                showSection('chatbot-section');
+                loadChatHistory(); // Load history after profile setup
+                // Initial welcome message with personalization
+                if (chatHistory.length === 0) {
+                    appendMessage(`Hello ${profileData.name}! I'm ready to help you with your career journey. What's on your mind today?`, 'bot', true);
+                }
+            });
+
+            // Send message function
+            async function sendMessage() {
                 const message = userInput.value.trim();
-                if (message) {
-                    appendMessage(message, 'user');
-                    userInput.value = '';
-                    fetch('/chat', {
+                if (!message) return;
+
+                appendMessage(message, 'user');
+                userInput.value = '';
+                userInput.disabled = true; // Disable input while bot is typing
+                sendButton.disabled = true;
+
+                // Construct prompt with profile context
+                const context = `The student's name is ${profileData.name}, they are ${profileData.age} years old, in ${profileData.grade}, and interested in ${profileData.interests}. Their preferred language is ${profileData.preferredLanguage}.`;
+                const prompt = `${context}\n\nUser: ${message}`;
+
+                try {
+                    const response = await fetch('/chat', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ message: message }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        appendMessage(data.reply, 'bot');
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        appendMessage('Sorry, I encountered an issue.', 'bot');
+                        body: JSON.stringify({ message: prompt }), // Send combined prompt to Flask
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    appendMessage(data.reply, 'bot', true); // Animate bot's reply
+                } catch (error) {
+                    console.error('Error:', error);
+                    appendMessage('Sorry, I encountered an issue. Please try again later.', 'bot', false);
+                } finally {
+                    userInput.disabled = false; // Re-enable input
+                    sendButton.disabled = false;
+                    userInput.focus(); // Focus back to input
+                }
+            }
+
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
                 }
             });
 
-            userInput.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter') {
-                    sendButton.click();
+            // Quick suggestion chips click handler
+            suggestionChips.addEventListener('click', (e) => {
+                if (e.target.classList.contains('chip-btn')) {
+                    userInput.value = e.target.textContent;
+                    sendMessage();
                 }
             });
+
+            // Language toggle dropdown
+            languageToggle.addEventListener('click', () => {
+                languageDropdown.classList.toggle('hidden');
+            });
+
+            languageDropdown.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    const selectedLang = e.target.dataset.lang;
+                    currentLangSpan.textContent = e.target.textContent;
+                    // In a real app, you'd load translations here
+                    console.log(`Language set to: ${selectedLang}`);
+                    // You might want to update profileData.preferredLanguage here too
+                    // profileData.preferredLanguage = selectedLang;
+                    // localStorage.setItem('studentProfile', JSON.stringify(profileData));
+                    languageDropdown.classList.add('hidden');
+                }
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!languageToggle.contains(e.target) && !languageDropdown.contains(e.target)) {
+                    languageDropdown.classList.add('hidden');
+                }
+            });
+
+            // Initial check on load
+            if (loadProfile()) {
+                showSection('chatbot-section');
+                loadChatHistory();
+            } else {
+                showSection('home-section');
+            }
         });
     </script>
 </body>
