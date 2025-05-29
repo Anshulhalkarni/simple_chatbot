@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Counselor Chatbot</title>
+    <title>Your Career Companion</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Your Career Companion</h1>
-            <p>Ask me anything about your career path!</p>
+    <div class="chatbot-container">
+        <header class="chatbot-header">
+            <div class="header-content">
+                <i class="fas fa-graduation-cap chatbot-icon"></i>
+                <h1>Career Guidance Chatbot</h1>
+            </div>
         </header>
-        <main>
-            <div id="chat-container">
-                <div id="chat-log">
-                    <div class="bot-message">Hi there! How can I help you today?</div>
-                </div>
-                <div id="input-area">
-                    <input type="text" id="user-input" placeholder="Type your question here...">
-                    <button id="send-button">Send</button>
-                </div>
+        <main class="chatbot-main">
+            <div id="chat-log" class="chat-log">
+                <div class="bot-message"><i class="fas fa-robot"></i> Hi there! How can I guide your career journey today?</div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Ask me about careers, courses, etc.">
+                <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
             </div>
         </main>
-        <footer>
-            <p>&copy; 2025 Career Guidance</p>
+        <footer class="chatbot-footer">
+            <p>&copy; 2025 Your Career Companion</p>
         </footer>
     </div>
 
@@ -37,9 +38,9 @@
             function appendMessage(message, sender) {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add(`${sender}-message`);
-                messageDiv.textContent = message;
+                messageDiv.innerHTML = (sender === 'user' ? '<i class="fas fa-user"></i> ' : '<i class="fas fa-robot"></i> ') + message;
                 chatLog.appendChild(messageDiv);
-                chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to bottom
+                chatLog.scrollTop = chatLog.scrollHeight;
             }
 
             sendButton.addEventListener('click', () => {
@@ -60,7 +61,7 @@
                     })
                     .catch((error) => {
                         console.error('Error:', error);
-                        appendMessage('Sorry, there was an error communicating with the server.', 'bot');
+                        appendMessage('Sorry, I encountered an issue.', 'bot');
                     });
                 }
             });
